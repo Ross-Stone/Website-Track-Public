@@ -1,0 +1,4 @@
+# Local development only. Copy to .dev.vars (gitignored). Never set these in a deployed environment;
+# the Worker refuses to run the stub when Access is configured or the host is not localhost.
+DEV_AUTH_STUB=1
+DEV_AUTH_EMAIL=alex@example.com

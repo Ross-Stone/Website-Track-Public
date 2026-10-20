@@ -1,0 +1,7 @@
+dist
+.wrangler
+migrations/meta
+package-lock.json
+coverage
+docs/requirements.md
+wrangler.jsonc

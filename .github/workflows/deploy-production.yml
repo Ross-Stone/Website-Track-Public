@@ -1,0 +1,109 @@
+name: Deploy production
+
+# Runs on every push to main (merging a PR), but ONLY deploys when the repository variable
+# DEPLOY_ENABLED is 'true' and the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets exist.
+# Once the end-to-end tests pass, it applies D1 migrations to track-prod, makes the first Admin from the
+# ADMIN_EMAIL variable if the database has none, then deploys the production Worker. This is the ONLY
+# path to production.
+on:
+  push:
+    branches: [main]
+  # Lets you deploy main by hand, for example after first setting DEPLOY_ENABLED.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+jobs:
+  # Skipped unless DEPLOY_ENABLED is 'true'. Fails loudly if it is but the secrets are missing.
+  ready:
+    if: vars.DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the Cloudflare secrets exist
+        env:
+          HAS_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+          HAS_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+        run: |
+          if [ "$HAS_TOKEN" != "true" ] || [ "$HAS_ACCOUNT" != "true" ]; then
+            echo "::error::DEPLOY_ENABLED is true but CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is missing. Nothing was deployed."
+            exit 1
+          fi
+
+  # Playwright at Pixel 7 and Pixel 6a with axe (TECH-12), against a local Worker and a fresh local D1.
+  # Local only: no Cloudflare secrets, and the dev auth stub is switched on just for this server.
+  e2e:
+    needs: ready
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+      - name: Upload the Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  deploy:
+    # Production only deploys once the end-to-end tests pass.
+    needs: [ready, e2e]
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Checks
+        run: |
+          npm run typecheck
+          npm run lint
+          npm run format:check
+          npm test
+      - name: Check the placeholders are filled in
+        run: |
+          if grep -nE 'REPLACE_WITH_|example\.com' wrangler.jsonc | grep -vE '^[0-9]+:\s*//'; then
+            echo "::error::wrangler.jsonc still has placeholders (above). See 'Fill in the placeholders' in the README."
+            exit 1
+          fi
+      - run: npx vite build
+      - name: Apply D1 migrations (track-prod)
+        run: npx wrangler d1 migrations apply track-prod --remote --env production
+      - name: Make the first Admin (only if there isn't one)
+        env:
+          ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL }}
+        run: |
+          if [ -z "$ADMIN_EMAIL" ]; then
+            echo "::warning::The ADMIN_EMAIL variable is not set, so no first Admin was added."
+            exit 0
+          fi
+          node scripts/admin-sql.mjs "$ADMIN_EMAIL" > admin.sql
+          npx wrangler d1 execute track-prod --remote --env production --yes --file admin.sql
+      - name: Deploy Worker (production)
+        run: npx wrangler deploy --env production

@@ -1,0 +1,193 @@
+/*
+ * Design tokens from the Track design (App.dc.html). Light is the default; dark applies when the
+ * device prefers dark and the user hasn't chosen Light, or when the user chose Dark.
+ * Accessibility adjustments agreed in Q4 are marked "a11y": they bring control boundaries up to 3:1.
+ */
+:root {
+  color-scheme: light;
+  --font-sans: 'DM Sans Variable', system-ui, sans-serif;
+
+  --bg: #f7f8fa;
+  --surface: #ffffff;
+  --surface-2: #edf0f4;
+  --field: #ffffff;
+  --text: #1a1d24;
+  --muted: #5b6270;
+  --line: #e1e5eb;
+  --dashed: #b4bbc7;
+  --control-border: #858d9b; /* a11y: was --dashed (1.8:1) */
+  --accent: #2457c5;
+  --on-accent: #ffffff;
+  --on-accent-muted: #dce6fb;
+  --accent-soft: #e3ecfb;
+  --accent-text: #1d48a6;
+  --now: #c2410c;
+  --warn-bg: #fff1dc;
+  --warn-text: #7a4300;
+  --danger: #b42318;
+  --scrim: rgba(17, 20, 28, 0.45);
+  --nav-bg: #ffffff;
+  --dis-bg: #e6e9ee;
+  --dis-text: #7c8494;
+  --snack-bg: #1a1d24;
+  --snack-text: #ffffff;
+  --snack-action: #9dbbff;
+  --track-on: #2457c5;
+  --knob-on: #ffffff;
+  --track-off: #7c8494; /* a11y: was #c4c9d2 (1.66:1) */
+  --knob-off: #ffffff;
+  --info-bg: #e3ecfb;
+  --info-text: #1d3b80;
+  --on-activity: #ffffff;
+  --focus: #2457c5;
+
+  /* Activity palette: fg / bg per colour (FR-ACT-03). */
+  --amber-fg: #8a5a0b;
+  --amber-bg: #fcefd6;
+  --orange-fg: #8a4b14;
+  --orange-bg: #f7e6d3;
+  --blue-fg: #2457c5;
+  --blue-bg: #e3ecfb;
+  --green-fg: #23603f;
+  --green-bg: #e2f3e8;
+  --violet-fg: #5b3fc4;
+  --violet-bg: #ece8fb;
+  --red-fg: #a5281d;
+  --red-bg: #fbe5e3;
+  --brown-fg: #6b4423;
+  --brown-bg: #efe6dd;
+  --teal-fg: #0b5e74;
+  --teal-bg: #ddf2f6;
+  --indigo-fg: #43358a;
+  --indigo-bg: #e7e3f5;
+  --slate-fg: #3d4a5c;
+  --slate-bg: #e4e8ee;
+  --pink-fg: #9d2b6b;
+  --pink-bg: #fbe4f0;
+
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-sheet: 24px;
+  --target: 44px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #0f1218;
+    --surface: #181c25;
+    --surface-2: #232836;
+    --field: #12151c;
+    --text: #e9ebf0;
+    --muted: #a3aab8;
+    --line: #2a303d;
+    --dashed: #4a5366;
+    --control-border: #6a7386;
+    --accent: #7ea6ff;
+    --on-accent: #0b1530;
+    --on-accent-muted: #1e3263;
+    --accent-soft: #1e2a47;
+    --accent-text: #a9c3ff;
+    --now: #ff8a50;
+    --warn-bg: #3a2a10;
+    --warn-text: #ffd08f;
+    --danger: #ff9a8f;
+    --scrim: rgba(0, 0, 0, 0.6);
+    --nav-bg: #141821;
+    --dis-bg: #2a303d;
+    --dis-text: #7c8494;
+    --snack-bg: #e9ebf0;
+    --snack-text: #11141a;
+    --snack-action: #2457c5;
+    --track-on: #7ea6ff;
+    --knob-on: #0f1218;
+    --track-off: #6a7386;
+    --knob-off: #a3aab8;
+    --info-bg: #1e2a47;
+    --info-text: #c9d7ff;
+    --on-activity: #11141a;
+    --focus: #7ea6ff;
+    --amber-fg: #ffd27a;
+    --amber-bg: #3a2e14;
+    --orange-fg: #f2b98a;
+    --orange-bg: #3a2618;
+    --blue-fg: #8fb4ff;
+    --blue-bg: #1e2a47;
+    --green-fg: #8ee0ae;
+    --green-bg: #18352a;
+    --violet-fg: #b9b2ff;
+    --violet-bg: #262447;
+    --red-fg: #ffb4a8;
+    --red-bg: #3d1f22;
+    --brown-fg: #e8c9a4;
+    --brown-bg: #33281d;
+    --teal-fg: #7fddeb;
+    --teal-bg: #163a40;
+    --indigo-fg: #d2b8ff;
+    --indigo-bg: #2e2242;
+    --slate-fg: #c3ccda;
+    --slate-bg: #252c38;
+    --pink-fg: #ffadd6;
+    --pink-bg: #3b1b2e;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0f1218;
+  --surface: #181c25;
+  --surface-2: #232836;
+  --field: #12151c;
+  --text: #e9ebf0;
+  --muted: #a3aab8;
+  --line: #2a303d;
+  --dashed: #4a5366;
+  --control-border: #6a7386;
+  --accent: #7ea6ff;
+  --on-accent: #0b1530;
+  --on-accent-muted: #1e3263;
+  --accent-soft: #1e2a47;
+  --accent-text: #a9c3ff;
+  --now: #ff8a50;
+  --warn-bg: #3a2a10;
+  --warn-text: #ffd08f;
+  --danger: #ff9a8f;
+  --scrim: rgba(0, 0, 0, 0.6);
+  --nav-bg: #141821;
+  --dis-bg: #2a303d;
+  --dis-text: #7c8494;
+  --snack-bg: #e9ebf0;
+  --snack-text: #11141a;
+  --snack-action: #2457c5;
+  --track-on: #7ea6ff;
+  --knob-on: #0f1218;
+  --track-off: #6a7386;
+  --knob-off: #a3aab8;
+  --info-bg: #1e2a47;
+  --info-text: #c9d7ff;
+  --on-activity: #11141a;
+  --focus: #7ea6ff;
+  --amber-fg: #ffd27a;
+  --amber-bg: #3a2e14;
+  --orange-fg: #f2b98a;
+  --orange-bg: #3a2618;
+  --blue-fg: #8fb4ff;
+  --blue-bg: #1e2a47;
+  --green-fg: #8ee0ae;
+  --green-bg: #18352a;
+  --violet-fg: #b9b2ff;
+  --violet-bg: #262447;
+  --red-fg: #ffb4a8;
+  --red-bg: #3d1f22;
+  --brown-fg: #e8c9a4;
+  --brown-bg: #33281d;
+  --teal-fg: #7fddeb;
+  --teal-bg: #163a40;
+  --indigo-fg: #d2b8ff;
+  --indigo-bg: #2e2242;
+  --slate-fg: #c3ccda;
+  --slate-bg: #252c38;
+  --pink-fg: #ffadd6;
+  --pink-bg: #3b1b2e;
+}

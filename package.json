@@ -1,0 +1,73 @@
+{
+  "name": "track",
+  "version": "1.0.1",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "mkdir -p dist/client && concurrently -k -n vite,worker -c blue,magenta \"vite\" \"wrangler dev --port 8787\"",
+    "build": "vite build && wrangler deploy --dry-run --env production --outdir dist/worker",
+    "preview:local": "vite build && wrangler dev --port 8787",
+    "typecheck": "tsc -p tsconfig.client.json && tsc -p tsconfig.worker.json && tsc -p tsconfig.node.json && tsc -p tsconfig.e2e.json",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "mkdir -p dist/client && vitest run",
+    "test:watch": "mkdir -p dist/client && vitest",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm test && npm run build",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply track-local --local",
+    "seed:generate": "tsx scripts/seed.ts",
+    "seed:check": "tsx scripts/seed.ts --check",
+    "db:admin:local": "node scripts/local-admin.mjs",
+    "seed:demo": "tsx scripts/seed-demo.ts",
+    "screenshots": "tsx scripts/screenshots.ts",
+    "icons:generate": "node scripts/icons.mjs",
+    "e2e:server": "rm -rf .wrangler/e2e && wrangler d1 migrations apply track-local --local --persist-to .wrangler/e2e && wrangler d1 execute track-local --local --persist-to .wrangler/e2e --file test/fixtures/test-family.sql && vite build && wrangler dev --port 8787 --persist-to .wrangler/e2e --var DEV_AUTH_STUB:1 --var DEV_AUTH_EMAIL:alex@example.com",
+    "e2e": "playwright test"
+  },
+  "dependencies": {
+    "@fontsource-variable/dm-sans": "5.3.0",
+    "drizzle-orm": "0.45.4",
+    "hono": "4.13.13",
+    "jose": "6.2.12",
+    "lucide-react": "1.59.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "ulid": "3.0.2",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@cloudflare/vitest-plugin": "1.4.4",
+    "@cloudflare/workers-types": "5.20261018.1",
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.64.1",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "concurrently": "10.0.6",
+    "drizzle-kit": "0.31.11",
+    "eslint": "10.13.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.13.0",
+    "prettier": "3.9.10",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.2",
+    "vite": "8.3.4",
+    "vitest": "4.1.12",
+    "wrangler": "4.151.1"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "esbuild@0.18.20": true,
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.2": true,
+    "workerd@1.20260815.1": true,
+    "workerd@1.20261012.1": true
+  }
+}

@@ -1,0 +1,78 @@
+// Track: one Worker serves the built SPA (static assets) and the Hono API under /api.
+//
+// The top level is LOCAL DEVELOPMENT ONLY (`wrangler dev`, Vitest, Playwright). It has no routes,
+// no workers.dev URL, a dummy D1 id and no Access vars, so it cannot be deployed usefully.
+// The dev auth stub refuses to run whenever Access vars are present (see src/worker/auth).
+//
+// Deployed environments are `production` and `preview`. Note that vars, bindings and routes are
+// NOT inherited by named environments, so each one lists everything it needs.
+//
+// BEFORE YOU DEPLOY: replace every REPLACE_WITH_… value and both example.com hosts below with your own.
+// The README's "Fill in the placeholders" table explains where each value comes from. Keep the Worker
+// and database names (track, track-preview, track-prod) as they are.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "track-local",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"],
+  },
+  "observability": { "enabled": true },
+  "vars": {
+    "ENVIRONMENT": "development",
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "track-local",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "env": {
+    "production": {
+      "name": "track",
+      "workers_dev": false,
+      "preview_urls": false,
+      "routes": [{ "pattern": "track.example.com", "custom_domain": true }],
+      "vars": {
+        "ENVIRONMENT": "production",
+        "ACCESS_TEAM_DOMAIN": "REPLACE_WITH_TEAM_NAME.cloudflareaccess.com",
+        "ACCESS_AUD": "REPLACE_WITH_PROD_ACCESS_AUD",
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "track-prod",
+          "database_id": "REPLACE_WITH_PROD_D1_ID",
+          "migrations_dir": "migrations",
+        },
+      ],
+    },
+    "preview": {
+      "name": "track-preview",
+      "workers_dev": false,
+      "preview_urls": false,
+      "routes": [{ "pattern": "track-preview.example.com", "custom_domain": true }],
+      "vars": {
+        "ENVIRONMENT": "preview",
+        "ACCESS_TEAM_DOMAIN": "REPLACE_WITH_TEAM_NAME.cloudflareaccess.com",
+        "ACCESS_AUD": "REPLACE_WITH_PREVIEW_ACCESS_AUD",
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "track-preview",
+          "database_id": "REPLACE_WITH_PREVIEW_D1_ID",
+          "migrations_dir": "migrations",
+        },
+      ],
+    },
+  },
+}
